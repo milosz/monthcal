@@ -80,33 +80,28 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	}
         return $data;
     }
+
  
    /**
     * Handle the actual output creation.
     *
-    * <p>
-    * The method checks for the given <tt>$aFormat</tt> and returns
-    * <tt>FALSE</tt> when a format isn't supported. <tt>$aRenderer</tt>
-    * contains a reference to the renderer object which is currently
-    * handling the rendering. The contents of <tt>$aData</tt> is the
-    * return value of the <tt>handle()</tt> method.
-    * </p>
-    * @param $aFormat String The output format to generate.
-    * @param $aRenderer Object A reference to the renderer object.
-    * @param $aData Array The data created by the <tt>handle()</tt>
-    * method.
-    * @return Boolean <tt>TRUE</tt> if rendered successfully, or
-    * <tt>FALSE</tt> otherwise.
-    * @public
-    * @see handle()
     */
     function render($mode, &$renderer, $data) {
         if($mode == 'xhtml'){
-            $renderer->doc .= "Hello World!";            // ptype = 'normal'
-//            $renderer->doc .= "<p>Hello World!</p>";     // ptype = 'block'
+            $renderer->doc .= $this->create_calendar($data);
             return true;
         }
         return false;
+    }
+
+
+   /**
+    * Create calendar
+    *
+    */
+    function create_calendar($data) {
+	$html = "";
+        return $html;
     }
 }
  
