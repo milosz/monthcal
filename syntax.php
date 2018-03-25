@@ -100,7 +100,66 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
     *
     */
     function create_calendar($data) {
-	$html = "";
+	// date: from -> to
+	$date_from = new DateTime($data['year'] . "-" . $data['month'] . "-01");
+	$date_to   = (new DateTime($date_from->format('Y-m-d')))->modify('+1 month');
+
+	$date_interval = new DateInterval('P1D');
+	$date_range    = new DatePeriod($date_from, $date_interval, $date_to);
+
+	// first day in on ...
+	$date_from_on_weekday = $date_from->format('N');
+
+	// language specific
+	$weekdays = $this->getLang('monthcal_weekdays_short');
+	$months   = $this->getLang('monthcal_months');
+
+	// weekday variable which is used inside each loop
+	$wday = 1;
+
+	// html code
+	$html = '<table class="monthcal">';
+
+	// header
+	$html .= '<tr><td colspan="4">' . $months[$date_from->format('m')-1] . '</td><td colspan="3">' . $date_from->format('Y') . '</td></tr>';
+
+	// weekdays
+	$html .= '<tr>';
+	foreach($weekdays as $weekday) {
+		$html .= '<th>' . $weekday . '</th>';
+	}
+	$html .= '</tr>';
+	$html .= '<tr>';
+
+	// first empty days
+	if ($date_from_on_weekday > 1) {
+		for($wday;$wday < (7-$date_from_on_weekday + 1);$wday++) {
+			$html .= '<td></td>';
+		}
+	}
+
+	// month days
+	foreach($date_range as $date) {
+		if ($wday > 7) {
+			$wday = 1;
+			$html .= "</tr>";
+			$html .= "<tr>";
+		}
+		$html .= '<td>' . $date->format('d') . '</td>';
+		$wday++;
+	}
+
+	// last empty days
+	if ($wday < 8) {
+		for($wday;$wday<8;$wday++) {
+			$html .= '<td></td>';
+		}
+	}
+
+	// close table
+	$html .= '</table>';
+
+	// return table
         return $html;
     }
 }
