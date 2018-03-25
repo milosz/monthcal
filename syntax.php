@@ -1,11 +1,9 @@
 <?php
 /**
- * Plugin Skeleton: Displays "Hello World!"
+ * Plugin monthcal: Display monthly calendar
  *
- * Syntax: <TEST> - will be replaced with "Hello World!"
- * 
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * @author     Christopher Smith <chris@jalakai.co.uk>
+ * @author     Milosz Galazka <milosz@sleeplessbeastie.eu>
  */
  
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
@@ -16,7 +14,7 @@ require_once(DOKU_PLUGIN.'syntax.php');
  * All DokuWiki plugins to extend the parser/rendering mechanism
  * need to inherit from this class
  */
-class syntax_plugin_test extends DokuWiki_Syntax_Plugin {
+class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
  
  
  
@@ -83,7 +81,7 @@ class syntax_plugin_test extends DokuWiki_Syntax_Plugin {
     * @see render()
     */
     function connectTo($mode) {
-      $this->Lexer->addSpecialPattern('<TEST>',$mode,'plugin_test');
+      $this->Lexer->addSpecialPattern('<TEST>',$mode,'plugin_monthcal');
 //      $this->Lexer->addEntryPattern('<TEST>',$mode,'plugin_test');
     }
  
