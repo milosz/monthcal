@@ -9,6 +9,7 @@
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 require_once(DOKU_PLUGIN.'syntax.php');
+require_once (DOKU_INC . 'inc/html.php');
  
 /**
  * All DokuWiki plugins to extend the parser/rendering mechanism
@@ -121,7 +122,7 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	$html = '<table class="monthcal">';
 
 	// header
-	$html .= '<tr><td colspan="4">' . $months[$date_from->format('m')-1] . '</td><td colspan="3">' . $date_from->format('Y') . '</td></tr>';
+	$html .= '<tr class="description"><td class="month" colspan="4">' . $months[$date_from->format('m')-1] . '</td><td class="year" colspan="3">' . $date_from->format('Y') . '</td></tr>';
 
 	// weekdays
 	$html .= '<tr>';
