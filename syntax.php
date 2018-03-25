@@ -21,21 +21,10 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
    /**
     * Get the type of syntax this plugin defines.
     *
-    * @param none
-    * @return String <tt>'substition'</tt> (i.e. 'substitution').
-    * @public
-    * @static
     */
     function getType(){
         return 'substition';
     }
- 
-    /**
-     * What kind of syntax do we allow (optional)
-     */
-//    function getAllowedTypes() {
-//        return array();
-//    }
  
    /**
     * Define how this plugin is handled regarding paragraphs.
