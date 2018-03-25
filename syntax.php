@@ -37,13 +37,12 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
    /**
     * Where to sort in?
     *
-    * @param none
-    * @return Integer <tt>6</tt>.
-    * @public
-    * @static
+    * Doku_Parser_Mode_html	190
+    *  --> execute here <--
+    * Doku_Parser_Mode_code	200
     */
     function getSort(){
-        return 999;
+        return 199;
     }
  
  
