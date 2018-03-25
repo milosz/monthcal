@@ -49,19 +49,10 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
    /**
     * Connect lookup pattern to lexer.
     *
-    * @param $aMode String The desired rendermode.
-    * @return none
-    * @public
-    * @see render()
     */
     function connectTo($mode) {
-      $this->Lexer->addSpecialPattern('<TEST>',$mode,'plugin_monthcal');
-//      $this->Lexer->addEntryPattern('<TEST>',$mode,'plugin_test');
+      $this->Lexer->addSpecialPattern('{{monthcal.*?}}',$mode,'plugin_monthcal');
     }
- 
-//    function postConnect() {
-//      $this->Lexer->addExitPattern('</TEST>','plugin_test');
-//    }
  
  
    /**
