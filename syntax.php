@@ -29,24 +29,10 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
    /**
     * Define how this plugin is handled regarding paragraphs.
     *
-    * <p>
-    * This method is important for correct XHTML nesting. It returns
-    * one of the following values:
-    * </p>
-    * <dl>
-    * <dt>normal</dt><dd>The plugin can be used inside paragraphs.</dd>
-    * <dt>block</dt><dd>Open paragraphs need to be closed before
-    * plugin output.</dd>
-    * <dt>stack</dt><dd>Special case: Plugin wraps other paragraphs.</dd>
-    * </dl>
-    * @param none
-    * @return String <tt>'block'</tt>.
-    * @public
-    * @static
     */
-//    function getPType(){
-//        return 'normal';
-//    }
+    function getPType(){
+        return 'block';
+    }
  
    /**
     * Where to sort in?
