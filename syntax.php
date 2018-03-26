@@ -63,8 +63,13 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
     function handle($match, $state, $pos, &$handler){
 	$data = array();
 
+	// get page info
+	$INFO = pageinfo();
+
+	$data['namespace'] = $INFO['namespace'];
 	$data['month'] = date('m');
 	$data['year'] =  date('Y');
+	$data['create_links'] = 1;
 
 	$provided_data = substr($match, 11, -2);
 	$arguments = explode (',', $provided_data);
@@ -76,6 +81,19 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 				break;
 			case 'month':
 				$data['month'] = $value;
+				break;
+			case 'namespace':
+				$data['namespace'] = (strpos($value, ':') === false) ?  ':' . $value : $value;
+				break;
+			case 'create_links':
+				switch(strtolower($value)) {
+					case 'no':
+						$data['create_links'] = 0;
+						break;
+					default:
+						$data['create_links'] = 1;
+						break;
+				}
 				break;
 			case 'week_start_on':
 				if(strtolower($value) == "sunday")
@@ -237,7 +255,15 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 		else
 			$css_today='';
 
-		$html .= '<td class="' . $css_td_border . ' ' . $css_today . '">' . $date->format('d') . '</td>';
+
+		if ($data['create_links'] == '1' ) {
+			$id = $data['namespace'] . ':' . $date->format('Y') . ':' . $date->format('m') . ':' . $date->format('d');
+			$html_day= html_wikilink($id, $date->format('d'));
+		} else {
+			$html_day = $date->format('d');
+		}
+
+		$html .= '<td class="' . $css_td_border . ' ' . $css_today . '">' . $html_day .  '</td>';
 		$wday++;
 	}
 
