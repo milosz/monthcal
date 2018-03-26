@@ -1,7 +1,6 @@
 div.dokuwiki table.monthcal {
 	font-size: 12px;
 	font-family: Verdana;
-	border: 0;
 }
 div.dokuwiki table.monthcal tr.description,
 div.dokuwiki table.monthcal tr.description td {
@@ -25,4 +24,11 @@ div.dokuwiki table.monthcal tr th {
 	text-align: center;
 	font-weight: bold;
 	background-color: #eee;
+}
+
+.borderless {
+	border: 0;
+}
+.withborder {
+	border: 1px solid #ccc;
 }

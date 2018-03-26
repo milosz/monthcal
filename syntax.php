@@ -83,6 +83,19 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 				else
 					$data['week_start_on'] = 0;
 				break;
+			case 'borders':
+				switch(strtolower($value)) {
+					case 'all':
+						$data['borders'] = 1;
+						break;
+					case 'table':
+						$data['borders'] = 2;
+						break;
+					default:
+						$data['borders'] = 0;
+						break;
+				}
+				break;
 		}
 	}
         return $data;
@@ -132,11 +145,28 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 			$date_from_on_weekday  = 1;
 	}
 
+
+	// border css
+	switch($data['borders']) {
+		case 1:
+			$css_table_border = 'withborder';
+			$css_td_border    = 'withborder';
+			break;
+		case 2:
+			$css_table_border = 'withborder';
+			$css_td_border    = 'borderless';
+			break;
+		case 0:
+			$css_table_border = 'borderless';
+			$css_td_border    = 'borderless';
+			break;
+	}
+
 	// html code
-	$html = '<table class="monthcal">';
+	$html = '<table class="monthcal ' . $css_table_border . '">';
 
 	// header
-	$html .= '<tr class="description"><td class="month" colspan="4">' . $months[$date_from->format('m')-1] . '</td><td class="year" colspan="3">' . $date_from->format('Y') . '</td></tr>';
+	$html .= '<tr class="description"><td class="month ' . $css_td_border . '" colspan="4">' . $months[$date_from->format('m')-1] . '</td><td class="year" colspan="3">' . $date_from->format('Y') . '</td></tr>';
 
 	// swap weekdays if week starts at Sunday
 	if ($data['week_start_on'] == 1) { $weekdays=array($weekdays[6],$weekdays[0],$weekdays[1],$weekdays[2],$weekdays[3],$weekdays[4],$weekdays[5]);}
@@ -144,7 +174,7 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	// weekdays
 	$html .= '<tr>';
 	foreach($weekdays as $weekday) {
-		$html .= '<th>' . $weekday . '</th>';
+		$html .= '<th class="' . $css_td_border . '">' . $weekday . '</th>';
 	}
 	$html .= '</tr>';
 	$html .= '<tr>';
@@ -152,7 +182,7 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	// first empty days
 	if ($date_from_on_weekday > 1) {
 		for($wday;$wday < $date_from_on_weekday;$wday++) {
-			$html .= '<td></td>';
+			$html .= '<td class="' . $css_td_border . '"></td>';
 		}
 	}
 
@@ -163,14 +193,14 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 			$html .= "</tr>";
 			$html .= "<tr>";
 		}
-		$html .= '<td>' . $date->format('d') . '</td>';
+		$html .= '<td class="' . $css_td_border . '">' . $date->format('d') . '</td>';
 		$wday++;
 	}
 
 	// last empty days
 	if ($wday < 8) {
 		for($wday;$wday<8;$wday++) {
-			$html .= '<td></td>';
+			$html .= '<td class="' . $css_td_border . '"></td>';
 		}
 	}
 
