@@ -77,6 +77,12 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 			case 'month':
 				$data['month'] = $value;
 				break;
+			case 'week_start_on':
+				if(strtolower($value) == "sunday")
+					$data['week_start_on'] = 1;
+				else
+					$data['week_start_on'] = 0;
+				break;
 		}
 	}
         return $data;
@@ -118,11 +124,22 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	// weekday variable which is used inside each loop
 	$wday = 1;
 
+	// move by one element to the right if week starts at Sunday
+	if ($data['week_start_on'] == 1) {
+		if($date_from_on_weekday <= 6)
+			$date_from_on_weekday += 1;
+		else
+			$date_from_on_weekday  = 1;
+	}
+
 	// html code
 	$html = '<table class="monthcal">';
 
 	// header
 	$html .= '<tr class="description"><td class="month" colspan="4">' . $months[$date_from->format('m')-1] . '</td><td class="year" colspan="3">' . $date_from->format('Y') . '</td></tr>';
+
+	// swap weekdays if week starts at Sunday
+	if ($data['week_start_on'] == 1) { $weekdays=array($weekdays[6],$weekdays[0],$weekdays[1],$weekdays[2],$weekdays[3],$weekdays[4],$weekdays[5]);}
 
 	// weekdays
 	$html .= '<tr>';
@@ -134,7 +151,7 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 
 	// first empty days
 	if ($date_from_on_weekday > 1) {
-		for($wday;$wday < (7-$date_from_on_weekday + 1);$wday++) {
+		for($wday;$wday < $date_from_on_weekday;$wday++) {
 			$html .= '<td></td>';
 		}
 	}
