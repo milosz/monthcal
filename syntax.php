@@ -17,8 +17,6 @@ require_once (DOKU_INC . 'inc/html.php');
  */
 class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
  
- 
- 
    /**
     * Get the type of syntax this plugin defines.
     *
@@ -46,7 +44,6 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
         return 199;
     }
  
- 
    /**
     * Connect lookup pattern to lexer.
     *
@@ -54,7 +51,6 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
     function connectTo($mode) {
       $this->Lexer->addSpecialPattern('{{monthcal.*?}}',$mode,'plugin_monthcal');
     }
- 
  
    /**
     * Handler to prepare matched data for the rendering process.
@@ -66,10 +62,15 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	// get page info
 	$INFO = pageinfo();
 
-	$data['namespace'] = $INFO['namespace'];
+	// default vaues
 	$data['month'] = date('m');
 	$data['year'] =  date('Y');
+	$data['namespace'] = $INFO['namespace'];
 	$data['create_links'] = 1;
+	$data['week_start_on'] = 0;
+	$data['borders'] = 0;
+	$data['mark_today'] = 1;
+	$data['align'] = 0;
 
 	$provided_data = substr($match, 11, -2);
 	$arguments = explode (',', $provided_data);
@@ -96,7 +97,7 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 				}
 				break;
 			case 'week_start_on':
-				if(strtolower($value) == "sunday")
+				if (strtolower($value) == "sunday")
 					$data['week_start_on'] = 1;
 				else
 					$data['week_start_on'] = 0;
@@ -117,10 +118,10 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 			case 'mark_today':
 				switch(strtolower($value)) {
 					case 'no':
-						$data['do_not_mark_today'] = 1;
+						$data['mark_today'] = 0;
 						break;
 					default:
-						$data['do_not_mark_today'] = NULL;
+						$data['mark_today'] = 1;
 						break;
 				}
 				break;
@@ -141,20 +142,18 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	}
         return $data;
     }
-
  
    /**
     * Handle the actual output creation.
     *
     */
     function render($mode, &$renderer, $data) {
-        if($mode == 'xhtml'){
+        if ($mode == 'xhtml'){
             $renderer->doc .= $this->create_calendar($data);
             return true;
         }
         return false;
     }
-
 
    /**
     * Create calendar
@@ -183,12 +182,11 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 
 	// move by one element to the right if week starts at Sunday
 	if ($data['week_start_on'] == 1) {
-		if($date_from_on_weekday <= 6)
+		if ($date_from_on_weekday <= 6)
 			$date_from_on_weekday += 1;
 		else
 			$date_from_on_weekday  = 1;
 	}
-
 
 	// border css
 	switch($data['align']) {
@@ -250,7 +248,7 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 			$html .= "</tr>";
 			$html .= "<tr>";
 		}
-		if ($date->format('Ymd') == $date_today->format('Ymd') and $data['do_not_mark_today'] == NULL)
+		if ($date->format('Ymd') == $date_today->format('Ymd') and $data['mark_today'] == 1)
 			$css_today='today';
 		else
 			$css_today='';
