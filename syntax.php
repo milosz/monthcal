@@ -96,6 +96,29 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 						break;
 				}
 				break;
+			case 'mark_today':
+				switch(strtolower($value)) {
+					case 'no':
+						$data['do_not_mark_today'] = 1;
+						break;
+					default:
+						$data['do_not_mark_today'] = NULL;
+						break;
+				}
+				break;
+			case 'align':
+				switch(strtolower($value)) {
+					case 'left':
+						$data['align'] = 1;
+						break;
+					case 'right':
+						$data['align'] = 2;
+						break;
+					default:
+						$data['align'] = 0;
+						break;
+				}
+				break;
 		}
 	}
         return $data;
@@ -120,6 +143,9 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
     *
     */
     function create_calendar($data) {
+	// date today
+	$date_today= new DateTime();
+
 	// date: from -> to
 	$date_from = new DateTime($data['year'] . "-" . $data['month'] . "-01");
 	$date_to   = (new DateTime($date_from->format('Y-m-d')))->modify('+1 month');
@@ -147,6 +173,19 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 
 
 	// border css
+	switch($data['align']) {
+		case 1:
+			$css_align = 'left';
+			break;
+		case 2:
+			$css_align = 'right';
+			break;
+		default:
+			$css_align = '';
+			break;
+	}
+
+	// border css
 	switch($data['borders']) {
 		case 1:
 			$css_table_border = 'withborder';
@@ -163,7 +202,7 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	}
 
 	// html code
-	$html = '<table class="monthcal ' . $css_table_border . '">';
+	$html = '<table class="monthcal ' . $css_table_border . ' ' . $css_align . '">';
 
 	// header
 	$html .= '<tr class="description"><td class="month ' . $css_td_border . '" colspan="4">' . $months[$date_from->format('m')-1] . '</td><td class="year" colspan="3">' . $date_from->format('Y') . '</td></tr>';
@@ -193,7 +232,12 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 			$html .= "</tr>";
 			$html .= "<tr>";
 		}
-		$html .= '<td class="' . $css_td_border . '">' . $date->format('d') . '</td>';
+		if ($date->format('Ymd') == $date_today->format('Ymd') and $data['do_not_mark_today'] == NULL)
+			$css_today='today';
+		else
+			$css_today='';
+
+		$html .= '<td class="' . $css_td_border . ' ' . $css_today . '">' . $date->format('d') . '</td>';
 		$wday++;
 	}
 
