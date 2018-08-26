@@ -73,6 +73,7 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	$data['borders'] = 0;
 	$data['mark_today'] = 1;
 	$data['align'] = 0;
+	$data['create_prev_next_links'] = 1;
 
 	$provided_data = substr($match, 11, -2);
 	$arguments = explode (',', $provided_data);
@@ -121,6 +122,16 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 						break;
 					default:
 						$data['do_not_create_past_links'] = 1;
+						break;
+				}
+				break;
+			case 'create_prev_next_links':
+				switch(strtolower($value)) {
+					case 'no':
+						$data['create_prev_next_links'] = 0;
+						break;
+					default:
+						$data['create_prev_next_links'] = 1;
 						break;
 				}
 				break;
@@ -186,11 +197,16 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	$date_today = new DateTime();
 
 	// date yesterday
-	$date_yesterday = $date_today->sub(new DateInterval('P1D'));
+	$date_yesterday = (new DateTime($date_today->format('Y-m-d')))->modify('-1 day');
+
 
 	// date: from -> to
 	$date_from = new DateTime($data['year'] . "-" . $data['month'] . "-01");
 	$date_to   = (new DateTime($date_from->format('Y-m-d')))->modify('+1 month');
+
+	// date prev/next month
+	$date_prev_month = (new DateTime($date_from->format('Y-m-d')))->modify('-1 month');
+	$date_next_month = $date_to; //(new DateTime($date_to->format('Y-m-d')))->modify('+1 month');
 
 	$date_interval = new DateInterval('P1D');
 	$date_range    = new DatePeriod($date_from, $date_interval, $date_to);
@@ -254,7 +270,14 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	}
 
 	// header
-	$html .= '<tr class="description"><td class="month ' . $css_td_border . '" colspan="' . $colspan_month . '">' . $months[$date_from->format('m')-1] . '</td><td class="year" colspan="' . $colspan_year . '">' . $date_from->format('Y') . '</td></tr>';
+	$html .= '<tr class="description">';
+	$html .= '<td class="month ' . $css_td_border . '" colspan="' . $colspan_month . '">' . $months[$date_from->format('m')-1] . ' ';
+	if ($data['create_prev_next_links']){
+		$html .= html_wikilink($data['namespace'] . ':' . $date_prev_month->format('Y') . ':' . $date_prev_month->format('m') . ':', '<<');
+		$html .= html_wikilink($data['namespace'] . ':' . $date_next_month->format('Y') . ':' . $date_next_month->format('m') . ':', '>>');
+	}
+	$html .= '</td>';
+	$html .= '<td class="year" colspan="' . $colspan_year . '">' . $date_from->format('Y') . '</td></tr>';
 
 	// swap weekdays if week starts at Sunday
 	if ($data['week_start_on'] == 1) { $weekdays=array($weekdays[6],$weekdays[0],$weekdays[1],$weekdays[2],$weekdays[3],$weekdays[4],$weekdays[5]);}
@@ -303,7 +326,7 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 
 		if ($data['create_links'] == '1' ) {
 			$id = $data['namespace'] . ':' . $date->format('Y') . ':' . $date->format('m') . ':' . $date->format('d');
-			if (($data['do_not_create_past_links'] == '1') and ($date < $date_yesterday)) {
+			if (($data['do_not_create_past_links'] == '1') and ($date->format('Ymd') <  $date_today->format('Ymd'))) {
 				$page_exists = null;
 				resolve_pageid($data['namespace'] . ':' . $date->format('Y') . ':' . $date->format('m'), $date->format('d'), $page_exists);
 				if ($page_exists) {
