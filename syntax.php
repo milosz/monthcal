@@ -73,7 +73,7 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	$data['borders'] = 0;
 	$data['mark_today'] = 1;
 	$data['align'] = 0;
-	$data['create_prev_next_links'] = 1;
+	$data['create_prev_next_links'] = 0;
 
 	$provided_data = substr($match, 11, -2);
 	$arguments = explode (',', $provided_data);
@@ -93,6 +93,9 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 				switch(strtolower($value)) {
 					case 'no':
 						$data['create_links'] = 0;
+						break;
+					case 'local':
+						$data['create_links'] = 2;
 						break;
 					default:
 						$data['create_links'] = 1;
@@ -337,6 +340,8 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 			} else {
 				$html_day = html_wikilink($id, $date->format('d'));
 			}
+		} else if ($data['create_links'] == '2' ) {
+			$html_day = '<a href="#section' . $date->format('d') . '">' . $date->format('d') . '</a>';
 		} else {
 			$html_day = $date->format('d');
 		}
