@@ -69,6 +69,7 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	$data['create_links'] = 1;
 	$data['week_start_on'] = 0;
 	$data['display_weeks'] = 0;
+	$data['do_not_create_past_links'] = 0;
 	$data['borders'] = 0;
 	$data['mark_today'] = 1;
 	$data['align'] = 0;
@@ -110,6 +111,16 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 						break;
 					default:
 						$data['display_weeks'] = 1;
+						break;
+				}
+				break;
+			case 'do_not_create_past_links':
+				switch(strtolower($value)) {
+					case 'no':
+						$data['do_not_create_past_links'] = 0;
+						break;
+					default:
+						$data['do_not_create_past_links'] = 1;
 						break;
 				}
 				break;
@@ -172,7 +183,10 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
     */
     function create_calendar($data) {
 	// date today
-	$date_today= new DateTime();
+	$date_today = new DateTime();
+
+	// date yesterday
+	$date_yesterday = $date_today->sub(new DateInterval('P1D'));
 
 	// date: from -> to
 	$date_from = new DateTime($data['year'] . "-" . $data['month'] . "-01");
@@ -282,16 +296,24 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 			}
 		}
 
-
 		if ($date->format('Ymd') == $date_today->format('Ymd') and $data['mark_today'] == 1)
 			$css_today='today';
 		else
 			$css_today='';
 
-
 		if ($data['create_links'] == '1' ) {
 			$id = $data['namespace'] . ':' . $date->format('Y') . ':' . $date->format('m') . ':' . $date->format('d');
-			$html_day= html_wikilink($id, $date->format('d'));
+			if (($data['do_not_create_past_links'] == '1') and ($date < $date_yesterday)) {
+				$page_exists = null;
+				resolve_pageid($data['namespace'] . ':' . $date->format('Y') . ':' . $date->format('m'), $date->format('d'), $page_exists);
+				if ($page_exists) {
+					$html_day = html_wikilink($id, $date->format('d'));
+				} else {
+					$html_day = $date->format('d');
+				}
+			} else {
+				$html_day = html_wikilink($id, $date->format('d'));
+			}
 		} else {
 			$html_day = $date->format('d');
 		}
