@@ -68,6 +68,7 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	$data['namespace'] = $INFO['namespace'];
 	$data['create_links'] = 1;
 	$data['week_start_on'] = 0;
+	$data['display_weeks'] = 0;
 	$data['borders'] = 0;
 	$data['mark_today'] = 1;
 	$data['align'] = 0;
@@ -101,6 +102,16 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 					$data['week_start_on'] = 1;
 				else
 					$data['week_start_on'] = 0;
+				break;
+			case 'display_weeks':
+				switch(strtolower($value)) {
+					case 'no':
+						$data['display_weeks'] = 0;
+						break;
+					default:
+						$data['display_weeks'] = 1;
+						break;
+				}
 				break;
 			case 'borders':
 				switch(strtolower($value)) {
@@ -220,11 +231,24 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	// html code
 	$html = '<table class="monthcal ' . $css_table_border . ' ' . $css_align . '">';
 
+	// colspan for month/year
+	$colspan_month = 4;
+	if ($data['display_weeks'] == '1') {
+		$colspan_year= 4;
+	} else {
+		$colspan_year= 3;
+	}
+
 	// header
-	$html .= '<tr class="description"><td class="month ' . $css_td_border . '" colspan="4">' . $months[$date_from->format('m')-1] . '</td><td class="year" colspan="3">' . $date_from->format('Y') . '</td></tr>';
+	$html .= '<tr class="description"><td class="month ' . $css_td_border . '" colspan="' . $colspan_month . '">' . $months[$date_from->format('m')-1] . '</td><td class="year" colspan="' . $colspan_year . '">' . $date_from->format('Y') . '</td></tr>';
 
 	// swap weekdays if week starts at Sunday
 	if ($data['week_start_on'] == 1) { $weekdays=array($weekdays[6],$weekdays[0],$weekdays[1],$weekdays[2],$weekdays[3],$weekdays[4],$weekdays[5]);}
+
+	// append empty header for week numbers
+	if ($data['display_weeks'] == '1') {
+		array_unshift($weekdays,"");
+	}
 
 	// weekdays
 	$html .= '<tr>';
@@ -233,6 +257,11 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	}
 	$html .= '</tr>';
 	$html .= '<tr>';
+
+	// initial week number
+	if ($data['display_weeks'] == '1') {
+		$html .= '<td class="' . $css_td_border . '">' . $date_from->format("W") . '</td>';
+	}
 
 	// first empty days
 	if ($date_from_on_weekday > 1) {
@@ -247,7 +276,13 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 			$wday = 1;
 			$html .= "</tr>";
 			$html .= "<tr>";
+
+			if ($data['display_weeks'] == '1') {
+				$html .= '<td class="' . $css_td_border . '">' . $date->format("W") . '</td>';
+			}
 		}
+
+
 		if ($date->format('Ymd') == $date_today->format('Ymd') and $data['mark_today'] == 1)
 			$css_today='today';
 		else
