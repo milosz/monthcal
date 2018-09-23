@@ -56,7 +56,7 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
     * Handler to prepare matched data for the rendering process.
     *
     */
-    function handle($match, $state, $pos, &$handler){
+    function handle($match, $state, $pos, Doku_Handler $handler){
 	$data = array();
 
 	// get page info
@@ -183,7 +183,7 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
     * Handle the actual output creation.
     *
     */
-    function render($mode, &$renderer, $data) {
+    function render($mode, Doku_Renderer $renderer, $data) {
         if ($mode == 'xhtml'){
             $renderer->doc .= $this->create_calendar($data);
             return true;
