@@ -68,9 +68,12 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	$data['namespace'] = $INFO['namespace'];
 	$data['create_links'] = 1;
 	$data['week_start_on'] = 0;
+	$data['display_weeks'] = 0;
+	$data['do_not_create_past_links'] = 0;
 	$data['borders'] = 0;
 	$data['mark_today'] = 1;
 	$data['align'] = 0;
+	$data['create_prev_next_links'] = 0;
 
 	$provided_data = substr($match, 11, -2);
 	$arguments = explode (',', $provided_data);
@@ -91,6 +94,9 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 					case 'no':
 						$data['create_links'] = 0;
 						break;
+					case 'local':
+						$data['create_links'] = 2;
+						break;
 					default:
 						$data['create_links'] = 1;
 						break;
@@ -101,6 +107,36 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 					$data['week_start_on'] = 1;
 				else
 					$data['week_start_on'] = 0;
+				break;
+			case 'display_weeks':
+				switch(strtolower($value)) {
+					case 'no':
+						$data['display_weeks'] = 0;
+						break;
+					default:
+						$data['display_weeks'] = 1;
+						break;
+				}
+				break;
+			case 'do_not_create_past_links':
+				switch(strtolower($value)) {
+					case 'no':
+						$data['do_not_create_past_links'] = 0;
+						break;
+					default:
+						$data['do_not_create_past_links'] = 1;
+						break;
+				}
+				break;
+			case 'create_prev_next_links':
+				switch(strtolower($value)) {
+					case 'no':
+						$data['create_prev_next_links'] = 0;
+						break;
+					default:
+						$data['create_prev_next_links'] = 1;
+						break;
+				}
 				break;
 			case 'borders':
 				switch(strtolower($value)) {
@@ -161,11 +197,19 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
     */
     function create_calendar($data) {
 	// date today
-	$date_today= new DateTime();
+	$date_today = new DateTime();
+
+	// date yesterday
+	$date_yesterday = (new DateTime($date_today->format('Y-m-d')))->modify('-1 day');
+
 
 	// date: from -> to
 	$date_from = new DateTime($data['year'] . "-" . $data['month'] . "-01");
 	$date_to   = (new DateTime($date_from->format('Y-m-d')))->modify('+1 month');
+
+	// date prev/next month
+	$date_prev_month = (new DateTime($date_from->format('Y-m-d')))->modify('-1 month');
+	$date_next_month = $date_to; //(new DateTime($date_to->format('Y-m-d')))->modify('+1 month');
 
 	$date_interval = new DateInterval('P1D');
 	$date_range    = new DatePeriod($date_from, $date_interval, $date_to);
@@ -220,11 +264,31 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	// html code
 	$html = '<table class="monthcal ' . $css_table_border . ' ' . $css_align . '">';
 
+	// colspan for month/year
+	$colspan_month = 4;
+	if ($data['display_weeks'] == '1') {
+		$colspan_year= 4;
+	} else {
+		$colspan_year= 3;
+	}
+
 	// header
-	$html .= '<tr class="description"><td class="month ' . $css_td_border . '" colspan="4">' . $months[$date_from->format('m')-1] . '</td><td class="year" colspan="3">' . $date_from->format('Y') . '</td></tr>';
+	$html .= '<tr class="description">';
+	$html .= '<td class="month ' . $css_td_border . '" colspan="' . $colspan_month . '">' . $months[$date_from->format('m')-1] . ' ';
+	if ($data['create_prev_next_links']){
+		$html .= html_wikilink($data['namespace'] . ':' . $date_prev_month->format('Y') . ':' . $date_prev_month->format('m') . ':', '<<');
+		$html .= html_wikilink($data['namespace'] . ':' . $date_next_month->format('Y') . ':' . $date_next_month->format('m') . ':', '>>');
+	}
+	$html .= '</td>';
+	$html .= '<td class="year" colspan="' . $colspan_year . '">' . $date_from->format('Y') . '</td></tr>';
 
 	// swap weekdays if week starts at Sunday
 	if ($data['week_start_on'] == 1) { $weekdays=array($weekdays[6],$weekdays[0],$weekdays[1],$weekdays[2],$weekdays[3],$weekdays[4],$weekdays[5]);}
+
+	// append empty header for week numbers
+	if ($data['display_weeks'] == '1') {
+		array_unshift($weekdays,"");
+	}
 
 	// weekdays
 	$html .= '<tr>';
@@ -233,6 +297,11 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 	}
 	$html .= '</tr>';
 	$html .= '<tr>';
+
+	// initial week number
+	if ($data['display_weeks'] == '1') {
+		$html .= '<td class="' . $css_td_border . '">' . $date_from->format("W") . '</td>';
+	}
 
 	// first empty days
 	if ($date_from_on_weekday > 1) {
@@ -247,16 +316,32 @@ class syntax_plugin_monthcal extends DokuWiki_Syntax_Plugin {
 			$wday = 1;
 			$html .= "</tr>";
 			$html .= "<tr>";
+
+			if ($data['display_weeks'] == '1') {
+				$html .= '<td class="' . $css_td_border . '">' . $date->format("W") . '</td>';
+			}
 		}
+
 		if ($date->format('Ymd') == $date_today->format('Ymd') and $data['mark_today'] == 1)
 			$css_today='today';
 		else
 			$css_today='';
 
-
 		if ($data['create_links'] == '1' ) {
 			$id = $data['namespace'] . ':' . $date->format('Y') . ':' . $date->format('m') . ':' . $date->format('d');
-			$html_day= html_wikilink($id, $date->format('d'));
+			if (($data['do_not_create_past_links'] == '1') and ($date->format('Ymd') <  $date_today->format('Ymd'))) {
+				$page_exists = null;
+				resolve_pageid($data['namespace'] . ':' . $date->format('Y') . ':' . $date->format('m'), $date->format('d'), $page_exists);
+				if ($page_exists) {
+					$html_day = html_wikilink($id, $date->format('d'));
+				} else {
+					$html_day = $date->format('d');
+				}
+			} else {
+				$html_day = html_wikilink($id, $date->format('d'));
+			}
+		} else if ($data['create_links'] == '2' ) {
+			$html_day = '<a href="#section' . $date->format('d') . '">' . $date->format('d') . '</a>';
 		} else {
 			$html_day = $date->format('d');
 		}
